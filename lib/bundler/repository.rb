@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module Bundler
   class InvalidRepository < StandardError ; end
 
@@ -167,7 +169,8 @@ module Bundler
     def expand_vendored_gem(spec, options)
       add_spec(spec)
       FileUtils.mkdir_p(@path.join("gems"))
-      File.symlink(spec.location, @path.join("gems", spec.full_name))
+      #File.symlink(spec.location, @path.join("gems", spec.full_name))
+      FileUtils.cp_r(spec.location, @path.join("gems", spec.full_name))
     end
 
     def add_spec(spec)
