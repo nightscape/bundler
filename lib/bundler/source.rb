@@ -283,6 +283,7 @@ module Bundler
   end
 
   class GitSource < DirectorySource
+    
     attr_reader :ref, :uri, :branch
 
     def initialize(options)
@@ -292,9 +293,13 @@ module Bundler
       @branch = options[:branch]
     end
 
+    def git_project_name
+       File.basename(@uri.split(':')[-1], '.git')
+    end
+
     def location
       # TMP HAX to get the *.gemspec reading to work
-      repository.path.join('dirs', File.basename(@uri, '.git'))
+      repository ? repository.path.join('dirs', git_project_name) : 'None'
     end
 
     def gems
@@ -304,10 +309,11 @@ module Bundler
         if local
           raise SourceNotCached, "Git repository '#{@uri}' has not been cloned yet"
         end
-
+        #p "Creating directory #{location.dirname}"
         FileUtils.mkdir_p(location.dirname)
 
         Bundler.logger.info "Cloning git repository at: #{@uri}"
+        #puts "git clone #{@uri} #{location} --no-hardlinks"
         `git clone #{@uri} #{location} --no-hardlinks`
 
         if @ref
